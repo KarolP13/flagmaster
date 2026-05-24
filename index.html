@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flagmaster — Learn Every Flag in the World</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #131a32;
+    --panel-2: #1a2247;
+    --text: #e8ecf8;
+    --muted: #9aa3c7;
+    --accent: #7c9cff;
+    --accent-2: #5be0c2;
+    --good: #4ade80;
+    --bad: #f87171;
+    --warn: #fbbf24;
+    --shadow: 0 10px 40px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: radial-gradient(1200px 600px at 20% 0%, #1a2150 0%, var(--bg) 60%) fixed;
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 28px; border-bottom: 1px solid rgba(255,255,255,.06);
+    background: rgba(11,16,32,.6); backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .3px; }
+  .brand .logo {
+    width: 36px; height: 24px; border-radius: 4px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.15);
+  }
+  .stats { display: flex; gap: 18px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+  .stat { background: var(--panel); padding: 8px 14px; border-radius: 10px; font-size: 14px; }
+  .stat b { color: var(--accent-2); margin-left: 6px; }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px; }
+  .modes {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px; margin-bottom: 22px;
+  }
+  .mode {
+    background: var(--panel); border: 1px solid rgba(255,255,255,.06);
+    padding: 16px; border-radius: 14px; cursor: pointer; transition: transform .12s ease, background .12s ease, border-color .12s ease;
+  }
+  .mode:hover { background: var(--panel-2); transform: translateY(-2px); }
+  .mode.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(124,156,255,.25); }
+  .mode h3 { margin: 0 0 6px; font-size: 16px; }
+  .mode p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    background: var(--panel); padding: 14px; border-radius: 12px; margin-bottom: 18px;
+  }
+  .controls label { font-size: 13px; color: var(--muted); margin-right: 4px; }
+  select, button, input[type="text"] {
+    background: var(--panel-2); color: var(--text); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px; padding: 9px 14px; font-size: 14px; outline: none;
+    font-family: inherit;
+  }
+  button { cursor: pointer; transition: background .12s ease, transform .06s ease; }
+  button:hover { background: #232c5e; }
+  button:active { transform: translateY(1px); }
+  button.primary { background: var(--accent); color: #0b1020; border: none; font-weight: 600; }
+  button.primary:hover { background: #9ab2ff; }
+  button.danger { background: var(--bad); color: #2a0a0a; border: none; }
+  .game {
+    background: var(--panel); border-radius: 18px; padding: 28px;
+    box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,.06);
+  }
+  .flag-wrap {
+    display: flex; justify-content: center; align-items: center;
+    background: #fff; border-radius: 14px; padding: 18px; min-height: 240px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.25); margin: 0 auto 18px;
+    max-width: 520px;
+  }
+  .flag-wrap img {
+    width: 100%; max-width: 460px; height: auto; border-radius: 6px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.2);
+  }
+  .prompt { text-align: center; color: var(--muted); margin: 6px 0 14px; font-size: 14px; }
+  .answer-area { display: grid; gap: 10px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choice {
+    text-align: left; padding: 14px 16px; font-size: 15px; line-height: 1.2;
+    background: var(--panel-2); border: 1px solid rgba(255,255,255,.06); border-radius: 12px;
+  }
+  .choice:hover { background: #24306b; }
+  .choice.correct { background: #14361f; border-color: var(--good); color: #b8f5cc; }
+  .choice.wrong { background: #3a1313; border-color: var(--bad); color: #fbd2d2; }
+  .choice.disabled { cursor: default; opacity: .85; }
+  .reveal {
+    text-align: center; font-size: 22px; font-weight: 700; margin: 12px 0 16px;
+  }
+  .reveal small { display: block; color: var(--muted); font-weight: 400; font-size: 13px; margin-top: 4px; }
+  .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .progress-bar {
+    height: 6px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden; margin: 10px 0 18px;
+  }
+  .progress-bar > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); width: 0%; transition: width .25s ease; }
+  .type-input {
+    width: 100%; font-size: 16px; padding: 12px 14px; text-align: center;
+  }
+  .feedback { text-align: center; min-height: 24px; font-size: 14px; margin-top: 4px; }
+  .feedback.good { color: var(--good); }
+  .feedback.bad { color: var(--bad); }
+  .timer-bar {
+    height: 6px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden; margin: 0 0 14px;
+  }
+  .timer-bar > div { height: 100%; background: linear-gradient(90deg, var(--warn), var(--bad)); width: 100%; }
+  .timer-text { font-variant-numeric: tabular-nums; color: var(--warn); font-weight: 700; }
+  .live-ticker { font-variant-numeric: tabular-nums; color: var(--accent-2); font-weight: 700; }
+  .end-screen { text-align: center; padding: 18px; }
+  .end-screen h2 { margin: 6px 0; font-size: 28px; }
+  .big-score { font-size: 48px; font-weight: 800; color: var(--accent-2); margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .badge { display: inline-block; background: var(--panel-2); padding: 4px 10px; border-radius: 999px; font-size: 12px; color: var(--muted); margin: 2px; }
+  .missed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 10px; margin-top: 18px; text-align: left; }
+  .missed { background: var(--panel-2); padding: 10px; border-radius: 10px; display: flex; gap: 10px; align-items: center; font-size: 13px; }
+  .missed img { width: 36px; height: auto; border-radius: 3px; background: #fff; }
+  .footer-note { text-align: center; color: var(--muted); font-size: 12px; padding: 18px; }
+  .scoreboard { overflow-x: auto; margin-top: 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,.06); }
+  .scoreboard table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .scoreboard th, .scoreboard td { padding: 9px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .scoreboard th { background: var(--panel-2); color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+  .scoreboard tr:last-child td { border-bottom: none; }
+  .scoreboard tr.highlight td { background: rgba(91, 224, 194, .08); color: var(--accent-2); }
+  .scoreboard tr.highlight td b { color: var(--accent-2); }
+  .tier-badge {
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #0b1020; font-weight: 800; border-radius: 14px; padding: 18px 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.3), inset 0 0 0 2px rgba(255,255,255,.2);
+    text-shadow: 0 1px 0 rgba(255,255,255,.25);
+    min-width: 140px;
+    background-size: 200% 200%;
+    animation: tier-shimmer 6s ease infinite;
+  }
+  .tier-badge .tier-name { font-size: 20px; letter-spacing: .5px; text-transform: uppercase; }
+  .tier-badge .tier-rating { font-size: 28px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  @keyframes tier-shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .ranked-dashboard { text-align: left; margin-top: 20px; }
+  .ranked-header { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .ranked-summary { flex: 1; min-width: 240px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .stat-grid > div { background: var(--panel-2); padding: 10px 14px; border-radius: 10px; }
+  .stat-grid span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+  .stat-grid b { display: block; font-size: 18px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .next-tier { margin-top: 12px; font-size: 14px; color: var(--muted); }
+  .improve-box { background: var(--panel-2); border-left: 3px solid var(--accent-2); padding: 12px 16px; border-radius: 8px; margin-top: 18px; font-size: 14px; }
+  .improve-box ul { margin: 6px 0 0; padding-left: 20px; }
+  .improve-box li { margin: 4px 0; line-height: 1.4; }
+  .head-btn {
+    background: var(--panel-2); color: var(--text); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px; padding: 6px 12px; font-size: 13px; cursor: pointer;
+    font-family: inherit;
+  }
+  .head-btn:hover { background: #2a3470; }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(5,8,18,.75); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid rgba(255,255,255,.08); border-radius: 16px;
+    padding: 26px; max-width: 420px; width: 92%; box-shadow: var(--shadow);
+  }
+  .modal h3 { margin: 0 0 8px; }
+  .modal p { color: var(--muted); font-size: 14px; margin: 0 0 14px; line-height: 1.5; }
+  .modal input { width: 100%; font-size: 16px; padding: 12px 14px; }
+  .modal .row { margin-top: 14px; }
+  .submit-result { background: var(--panel-2); border-radius: 12px; padding: 14px; margin-top: 12px; font-size: 14px; }
+  .submit-result.ok { border-left: 3px solid var(--good); }
+  .submit-result.fail { border-left: 3px solid var(--bad); }
+  .lb-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0 16px; }
+  .lb-tab {
+    background: var(--panel-2); border: 1px solid rgba(255,255,255,.06); color: var(--text);
+    padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 13px;
+  }
+  .lb-tab.active { background: var(--accent); color: #0b1020; border-color: var(--accent); font-weight: 600; }
+  .lb-filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .you-row td { background: rgba(124,156,255,.12) !important; color: var(--accent); }
+  .you-row td b { color: var(--accent); }
+  @media (max-width: 640px) {
+    .head-btn { padding: 5px 8px; font-size: 11px; }
+  }
+  @media (max-width: 640px) {
+    .choices { grid-template-columns: 1fr; }
+    header { padding: 12px 14px; }
+    main { padding: 14px; }
+    .game { padding: 18px; }
+    .stats { gap: 8px; }
+    .stat { padding: 6px 10px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo"></div>
+    <div>Flagmaster <span style="color:var(--muted); font-weight:400; font-size:13px;">— learn every flag</span></div>
+  </div>
+  <div class="stats">
+    <div class="stat">Score<b id="stat-score">0</b></div>
+    <div class="stat">Streak<b id="stat-streak">0</b></div>
+    <div class="stat">Best<b id="stat-best">0</b></div>
+    <div class="stat">Seen<b id="stat-seen">0</b>/<span id="stat-pool">0</span></div>
+    <div class="stat">Accuracy<b id="stat-acc">—</b></div>
+    <button id="leaderboardBtn" class="head-btn">🏅 Leaderboard</button>
+    <button id="userBtn" class="head-btn">👤 <span id="userLabel">Set name</span></button>
+  </div>
+</header>
+
+<main>
+  <div class="modes" id="modes"></div>
+
+  <div class="controls">
+    <label>Region</label>
+    <select id="region">
+      <option value="all">All countries</option>
+      <option value="Africa">Africa</option>
+      <option value="Americas">Americas</option>
+      <option value="Asia">Asia</option>
+      <option value="Europe">Europe</option>
+      <option value="Oceania">Oceania</option>
+    </select>
+    <label>Difficulty</label>
+    <select id="difficulty">
+      <option value="all">All flags</option>
+      <option value="easy">Easy (well-known)</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard (obscure)</option>
+    </select>
+    <label>Length</label>
+    <select id="length">
+      <option value="10">10 questions</option>
+      <option value="20" selected>20 questions</option>
+      <option value="50">50 questions</option>
+      <option value="0">All in pool</option>
+    </select>
+    <label>Choices</label>
+    <select id="choiceCount">
+      <option value="4" selected>4 options</option>
+      <option value="5">5 options</option>
+    </select>
+    <label>Death timer</label>
+    <select id="deathTimer">
+      <option value="3">3s</option>
+      <option value="4">4s</option>
+      <option value="5" selected>5s</option>
+      <option value="6">6s</option>
+      <option value="7">7s</option>
+      <option value="8">8s</option>
+      <option value="9">9s</option>
+      <option value="10">10s</option>
+    </select>
+    <button class="primary" id="startBtn">Start round</button>
+    <button id="resetStats">Reset all stats</button>
+  </div>
+
+  <div class="game" id="game">
+    <div class="progress-bar"><div id="progress"></div></div>
+    <div id="content"></div>
+  </div>
+
+  <div class="footer-note">
+    Flags via flagcdn.com · Progress saved locally · Keyboard: 1-5 to pick, Enter to continue · <a href="https://github.com" style="color:var(--muted);">Source</a>
+  </div>
+</main>
+
+<div id="userModal" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h3>Choose your handle</h3>
+    <p>This shows on global leaderboards. 2-20 characters, letters/numbers/<code>_</code>/<code>-</code> only. You can change it anytime.</p>
+    <input id="userInput" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="e.g. flagqueen99" />
+    <div id="userError" class="feedback bad" style="text-align:left; min-height:0;"></div>
+    <div class="row" style="justify-content:flex-end;">
+      <button id="userCancel">Cancel</button>
+      <button id="userSave" class="primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- COUNTRIES DATA ---------------- */
+/* ISO 3166-1 alpha-2 lowercase code, name, region, difficulty (1 easy, 2 medium, 3 hard) */
+const COUNTRIES = [
+  // Africa
+  ["dz","Algeria","Africa",2],["ao","Angola","Africa",2],["bj","Benin","Africa",3],
+  ["bw","Botswana","Africa",2],["bf","Burkina Faso","Africa",3],["bi","Burundi","Africa",3],
+  ["cv","Cape Verde","Africa",3],["cm","Cameroon","Africa",2],["cf","Central African Republic","Africa",3],
+  ["td","Chad","Africa",2],["km","Comoros","Africa",3],["cg","Republic of the Congo","Africa",3],
+  ["cd","Democratic Republic of the Congo","Africa",2],["ci","Ivory Coast","Africa",2],
+  ["dj","Djibouti","Africa",3],["eg","Egypt","Africa",1],["gq","Equatorial Guinea","Africa",3],
+  ["er","Eritrea","Africa",3],["sz","Eswatini","Africa",3],["et","Ethiopia","Africa",2],
+  ["ga","Gabon","Africa",3],["gm","Gambia","Africa",3],["gh","Ghana","Africa",2],
+  ["gn","Guinea","Africa",3],["gw","Guinea-Bissau","Africa",3],["ke","Kenya","Africa",1],
+  ["ls","Lesotho","Africa",3],["lr","Liberia","Africa",2],["ly","Libya","Africa",2],
+  ["mg","Madagascar","Africa",2],["mw","Malawi","Africa",3],["ml","Mali","Africa",2],
+  ["mr","Mauritania","Africa",3],["mu","Mauritius","Africa",3],["ma","Morocco","Africa",1],
+  ["mz","Mozambique","Africa",2],["na","Namibia","Africa",2],["ne","Niger","Africa",2],
+  ["ng","Nigeria","Africa",1],["rw","Rwanda","Africa",2],["st","São Tomé and Príncipe","Africa",3],
+  ["sn","Senegal","Africa",2],["sc","Seychelles","Africa",3],["sl","Sierra Leone","Africa",3],
+  ["so","Somalia","Africa",2],["za","South Africa","Africa",1],["ss","South Sudan","Africa",3],
+  ["sd","Sudan","Africa",2],["tz","Tanzania","Africa",2],["tg","Togo","Africa",3],
+  ["tn","Tunisia","Africa",2],["ug","Uganda","Africa",2],["zm","Zambia","Africa",2],
+  ["zw","Zimbabwe","Africa",2],
+
+  // Americas
+  ["ag","Antigua and Barbuda","Americas",3],["ar","Argentina","Americas",1],
+  ["bs","Bahamas","Americas",2],["bb","Barbados","Americas",3],["bz","Belize","Americas",3],
+  ["bo","Bolivia","Americas",2],["br","Brazil","Americas",1],["ca","Canada","Americas",1],
+  ["cl","Chile","Americas",1],["co","Colombia","Americas",1],["cr","Costa Rica","Americas",2],
+  ["cu","Cuba","Americas",1],["dm","Dominica","Americas",3],["do","Dominican Republic","Americas",2],
+  ["ec","Ecuador","Americas",2],["sv","El Salvador","Americas",2],["gd","Grenada","Americas",3],
+  ["gt","Guatemala","Americas",2],["gy","Guyana","Americas",3],["ht","Haiti","Americas",2],
+  ["hn","Honduras","Americas",2],["jm","Jamaica","Americas",1],["mx","Mexico","Americas",1],
+  ["ni","Nicaragua","Americas",2],["pa","Panama","Americas",2],["py","Paraguay","Americas",2],
+  ["pe","Peru","Americas",1],["kn","Saint Kitts and Nevis","Americas",3],["lc","Saint Lucia","Americas",3],
+  ["vc","Saint Vincent and the Grenadines","Americas",3],["sr","Suriname","Americas",3],
+  ["tt","Trinidad and Tobago","Americas",2],["us","United States","Americas",1],
+  ["uy","Uruguay","Americas",2],["ve","Venezuela","Americas",1],
+
+  // Asia
+  ["af","Afghanistan","Asia",2],["am","Armenia","Asia",2],["az","Azerbaijan","Asia",2],
+  ["bh","Bahrain","Asia",2],["bd","Bangladesh","Asia",2],["bt","Bhutan","Asia",3],
+  ["bn","Brunei","Asia",3],["kh","Cambodia","Asia",2],["cn","China","Asia",1],
+  ["cy","Cyprus","Asia",2],["ge","Georgia","Asia",2],["in","India","Asia",1],
+  ["id","Indonesia","Asia",1],["ir","Iran","Asia",1],["iq","Iraq","Asia",1],
+  ["il","Israel","Asia",1],["jp","Japan","Asia",1],["jo","Jordan","Asia",2],
+  ["kz","Kazakhstan","Asia",2],["kw","Kuwait","Asia",2],["kg","Kyrgyzstan","Asia",3],
+  ["la","Laos","Asia",3],["lb","Lebanon","Asia",1],["my","Malaysia","Asia",2],
+  ["mv","Maldives","Asia",3],["mn","Mongolia","Asia",2],["mm","Myanmar","Asia",2],
+  ["np","Nepal","Asia",1],["kp","North Korea","Asia",1],["om","Oman","Asia",2],
+  ["pk","Pakistan","Asia",1],["ps","Palestine","Asia",2],["ph","Philippines","Asia",1],
+  ["qa","Qatar","Asia",2],["sa","Saudi Arabia","Asia",1],["sg","Singapore","Asia",1],
+  ["kr","South Korea","Asia",1],["lk","Sri Lanka","Asia",2],["sy","Syria","Asia",2],
+  ["tw","Taiwan","Asia",2],["tj","Tajikistan","Asia",3],["th","Thailand","Asia",1],
+  ["tl","Timor-Leste","Asia",3],["tr","Turkey","Asia",1],["tm","Turkmenistan","Asia",3],
+  ["ae","United Arab Emirates","Asia",1],["uz","Uzbekistan","Asia",3],["vn","Vietnam","Asia",1],
+  ["ye","Yemen","Asia",2],
+
+  // Europe
+  ["al","Albania","Europe",2],["ad","Andorra","Europe",3],["at","Austria","Europe",1],
+  ["by","Belarus","Europe",2],["be","Belgium","Europe",1],["ba","Bosnia and Herzegovina","Europe",2],
+  ["bg","Bulgaria","Europe",2],["hr","Croatia","Europe",1],["cz","Czech Republic","Europe",2],
+  ["dk","Denmark","Europe",1],["ee","Estonia","Europe",2],["fi","Finland","Europe",1],
+  ["fr","France","Europe",1],["de","Germany","Europe",1],["gr","Greece","Europe",1],
+  ["hu","Hungary","Europe",2],["is","Iceland","Europe",1],["ie","Ireland","Europe",1],
+  ["it","Italy","Europe",1],["xk","Kosovo","Europe",3],["lv","Latvia","Europe",2],
+  ["li","Liechtenstein","Europe",3],["lt","Lithuania","Europe",2],["lu","Luxembourg","Europe",2],
+  ["mt","Malta","Europe",3],["md","Moldova","Europe",3],["mc","Monaco","Europe",2],
+  ["me","Montenegro","Europe",3],["nl","Netherlands","Europe",1],["mk","North Macedonia","Europe",3],
+  ["no","Norway","Europe",1],["pl","Poland","Europe",1],["pt","Portugal","Europe",1],
+  ["ro","Romania","Europe",1],["ru","Russia","Europe",1],["sm","San Marino","Europe",3],
+  ["rs","Serbia","Europe",2],["sk","Slovakia","Europe",2],["si","Slovenia","Europe",2],
+  ["es","Spain","Europe",1],["se","Sweden","Europe",1],["ch","Switzerland","Europe",1],
+  ["ua","Ukraine","Europe",1],["gb","United Kingdom","Europe",1],["va","Vatican City","Europe",3],
+
+  // Oceania
+  ["au","Australia","Oceania",1],["fj","Fiji","Oceania",2],["ki","Kiribati","Oceania",3],
+  ["mh","Marshall Islands","Oceania",3],["fm","Micronesia","Oceania",3],["nr","Nauru","Oceania",3],
+  ["nz","New Zealand","Oceania",1],["pw","Palau","Oceania",3],["pg","Papua New Guinea","Oceania",2],
+  ["ws","Samoa","Oceania",3],["sb","Solomon Islands","Oceania",3],["to","Tonga","Oceania",3],
+  ["tv","Tuvalu","Oceania",3],["vu","Vanuatu","Oceania",3]
+];
+
+/* Accept these as alternative names */
+const ALT_NAMES = {
+  "United States": ["usa","us","united states of america","america"],
+  "United Kingdom": ["uk","britain","great britain","england"],
+  "Czech Republic": ["czechia"],
+  "Ivory Coast": ["cote d'ivoire","côte d'ivoire"],
+  "Eswatini": ["swaziland"],
+  "North Macedonia": ["macedonia"],
+  "Timor-Leste": ["east timor"],
+  "Myanmar": ["burma"],
+  "Cape Verde": ["cabo verde"],
+  "Democratic Republic of the Congo": ["dr congo","drc","congo-kinshasa","congo (kinshasa)"],
+  "Republic of the Congo": ["congo","congo-brazzaville","congo (brazzaville)"],
+  "Vatican City": ["holy see","vatican"],
+  "São Tomé and Príncipe": ["sao tome and principe","sao tome"],
+  "Saint Kitts and Nevis": ["st kitts and nevis","st. kitts and nevis"],
+  "Saint Lucia": ["st lucia","st. lucia"],
+  "Saint Vincent and the Grenadines": ["st vincent and the grenadines","st. vincent"],
+  "Antigua and Barbuda": ["antigua"],
+  "Trinidad and Tobago": ["trinidad"],
+  "Bosnia and Herzegovina": ["bosnia"],
+  "Russia": ["russian federation"],
+  "South Korea": ["korea","republic of korea","s korea"],
+  "North Korea": ["dprk","democratic people's republic of korea","n korea"],
+  "Iran": ["islamic republic of iran","persia"],
+  "Syria": ["syrian arab republic"],
+  "Palestine": ["state of palestine"],
+  "Taiwan": ["republic of china","chinese taipei"],
+  "Laos": ["lao people's democratic republic","lao"],
+  "Vietnam": ["viet nam"],
+  "Brunei": ["brunei darussalam"]
+};
+
+/* ---------------- STATE ---------------- */
+const STORAGE_KEY = "flagmaster.v1";
+const defaultState = {
+  best: 0,
+  seen: {},        // code -> {right, wrong}
+  totalRight: 0,
+  totalWrong: 0,
+  deathScores: [], // [{survived, timer, region, difficulty, choices, date}]
+  ranked: {
+    placementDone: false,
+    rating: null,
+    tier: null,
+    placement: null, // {date, perFlag:{code:{time,correct}}, accuracy, avgTime, avgCorrectTime, rating, tier}
+    history: []      // [{date, rating, tier, accuracy, avgTime}]
+  },
+  timeAttack: {
+    bestTotalMs: {},   // poolKey -> ms
+    bestPerFlag: {},   // code -> ms
+    history: []        // [{date, poolKey, totalMs, errors, pbsHit, flags}]
+  }
+};
+let state = loadState();
+let mode = "multipleChoice";
+let pool = [];
+let queue = [];
+let current = null;
+let roundIndex = 0;
+let roundLength = 20;
+let roundScore = 0;
+let roundStreak = 0;
+let roundRight = 0;
+let roundWrong = 0;
+let missed = [];
+let timerHandle = null;
+let timerStart = 0;
+let timerDuration = 0;
+let awaitingNext = false;
+
+function freshState() { return JSON.parse(JSON.stringify(defaultState)); }
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return freshState();
+    return Object.assign(freshState(), JSON.parse(raw));
+  } catch (e) { return freshState(); }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+/* ---------------- MODES ---------------- */
+const MODES = [
+  { id: "multipleChoice", title: "Multiple Choice", desc: "Pick the right country from 4 options. Classic quiz." },
+  { id: "type",           title: "Type the Name",   desc: "Type the country name. Spelling is forgiving." },
+  { id: "reverse",        title: "Reverse",         desc: "Given a name, pick the matching flag." },
+  { id: "timed",          title: "Timed Sprint",    desc: "Multiple choice with 8s per flag. Speed bonus." },
+  { id: "flashcard",      title: "Flashcards",      desc: "Browse and study. Tap to reveal. No score." },
+  { id: "marathon",       title: "Marathon",        desc: "All flags in the pool, one shot each. Test mastery." },
+  { id: "death",          title: "Death Mode ☠",    desc: "Sudden death. Timer per flag (3–10s), resets on correct. One mistake ends the run." },
+  { id: "ranked",         title: "Ranked 🏆",        desc: "Placement through all 197 flags. Get a tier, see your weak spots, climb the ladder." },
+  { id: "timeattack",     title: "Time Attack ⏱",   desc: "Race through every flag. Track per-flag PBs and total best time." },
+  { id: "daily",          title: "Daily 📅",         desc: "Same 25 flags for everyone today. Race the world on today's leaderboard." }
+];
+
+/* ---------------- RANKED TIERS & RATING ---------------- */
+const TIERS = [
+  { name: "Iron",        min: 0,   color: "#7a6f63", gradient: "linear-gradient(135deg,#6b5e52,#3b332c)" },
+  { name: "Bronze",      min: 200, color: "#cd7f32", gradient: "linear-gradient(135deg,#e69547,#8b5a23)" },
+  { name: "Silver",      min: 350, color: "#c0c0c0", gradient: "linear-gradient(135deg,#e0e0e0,#888)" },
+  { name: "Gold",        min: 500, color: "#ffd700", gradient: "linear-gradient(135deg,#ffe566,#c79a00)" },
+  { name: "Platinum",    min: 650, color: "#5be0c2", gradient: "linear-gradient(135deg,#7eecd1,#2f9d83)" },
+  { name: "Diamond",     min: 750, color: "#7c9cff", gradient: "linear-gradient(135deg,#a4baff,#4a6ee0)" },
+  { name: "Master",      min: 850, color: "#c084fc", gradient: "linear-gradient(135deg,#dfb4ff,#8a3fc7)" },
+  { name: "Grandmaster", min: 925, color: "#f87171", gradient: "linear-gradient(135deg,#ffa3a3,#c43c3c)" },
+  { name: "Challenger",  min: 975, color: "#fde68a", gradient: "linear-gradient(135deg,#fef3c7 0%,#f59e0b 35%,#ef4444 70%,#8b5cf6 100%)" }
+];
+function rateAnswer(correct, timeMs) {
+  if (!correct) return 0;
+  if (timeMs <= 1000) return 1000;
+  if (timeMs <= 3000) return Math.round(1000 - ((timeMs - 1000) / 2000) * 300);
+  if (timeMs <= 8000) return Math.round(700 - ((timeMs - 3000) / 5000) * 400);
+  if (timeMs <= 15000) return Math.round(Math.max(100, 300 - ((timeMs - 8000) / 7000) * 200));
+  return 100;
+}
+function getTier(rating) {
+  if (rating == null) return null;
+  for (let i = TIERS.length - 1; i >= 0; i--) if (rating >= TIERS[i].min) return TIERS[i];
+  return TIERS[0];
+}
+function calcRanking(perFlag) {
+  const entries = Object.entries(perFlag);
+  if (!entries.length) return null;
+  let sum = 0, right = 0, totalTime = 0, correctTime = 0;
+  for (const [code, info] of entries) {
+    sum += rateAnswer(info.correct, info.time);
+    if (info.correct) { right++; correctTime += info.time; }
+    totalTime += info.time;
+  }
+  const rating = Math.round(sum / entries.length);
+  return {
+    rating, tier: getTier(rating),
+    accuracy: right / entries.length,
+    avgTime: totalTime / entries.length,
+    avgCorrectTime: right ? correctTime / right : 0,
+    total: entries.length, right, wrong: entries.length - right
+  };
+}
+function regionBreakdown(perFlag) {
+  const out = {};
+  for (const [code, info] of Object.entries(perFlag)) {
+    const c = COUNTRIES.find(x => x[0] === code); if (!c) continue;
+    const r = c[2];
+    out[r] = out[r] || { total: 0, right: 0, sumTime: 0 };
+    out[r].total++;
+    if (info.correct) out[r].right++;
+    out[r].sumTime += info.time;
+  }
+  return out;
+}
+function fmtTime(ms) {
+  if (ms == null) return "—";
+  if (ms < 10000) return (ms/1000).toFixed(2) + "s";
+  return (ms/1000).toFixed(1) + "s";
+}
+function fmtTotal(ms) {
+  if (ms == null) return "—";
+  const totalS = ms / 1000;
+  const m = Math.floor(totalS / 60);
+  const s = (totalS - m*60);
+  return m > 0 ? `${m}m ${s.toFixed(1)}s` : `${s.toFixed(2)}s`;
+}
+function nameByCode(code) { const c = COUNTRIES.find(x => x[0] === code); return c ? c[1] : code; }
+
+/* ---------------- UTIL ---------------- */
+function normalize(s) {
+  return (s || "").toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z ]/g, "").trim();
+}
+function isCorrectName(input, country) {
+  const n = normalize(input);
+  if (!n) return false;
+  if (n === normalize(country.name)) return true;
+  const alts = ALT_NAMES[country.name] || [];
+  return alts.some(a => normalize(a) === n);
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function pickRandom(arr, n, exclude) {
+  const pool = arr.filter(c => !exclude || c.code !== exclude.code);
+  return shuffle(pool).slice(0, n);
+}
+function buildPool() {
+  const region = document.getElementById("region").value;
+  const diff = document.getElementById("difficulty").value;
+  let p = COUNTRIES.map(([code,name,reg,d]) => ({ code, name, region: reg, difficulty: d }));
+  if (region !== "all") p = p.filter(c => c.region === region);
+  if (diff !== "all") {
+    const map = { easy: 1, medium: 2, hard: 3 };
+    p = p.filter(c => c.difficulty === map[diff]);
+  }
+  return p;
+}
+
+/* ---------------- RENDERING ---------------- */
+const $ = (id) => document.getElementById(id);
+const content = $("content");
+const progressEl = $("progress");
+
+function renderModes() {
+  const wrap = $("modes");
+  wrap.innerHTML = MODES.map(m => `
+    <div class="mode ${m.id===mode?'active':''}" data-id="${m.id}">
+      <h3>${m.title}</h3>
+      <p>${m.desc}</p>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".mode").forEach(el => {
+    el.addEventListener("click", () => {
+      mode = el.dataset.id;
+      renderModes();
+      if (mode === "death") showDeathIntro();
+      else if (mode === "ranked") showRankedIntro();
+      else if (mode === "timeattack") showTimeAttackIntro();
+      else if (mode === "daily") showDailyIntro();
+      else startRound();
+    });
+  });
+}
+
+function updateStats() {
+  $("stat-score").textContent = roundScore;
+  $("stat-streak").textContent = roundStreak;
+  $("stat-best").textContent = state.best;
+  const seen = Object.keys(state.seen).length;
+  $("stat-seen").textContent = seen;
+  $("stat-pool").textContent = pool.length || COUNTRIES.length;
+  const total = state.totalRight + state.totalWrong;
+  $("stat-acc").textContent = total ? Math.round(100 * state.totalRight / total) + "%" : "—";
+}
+
+function setProgress(pct) {
+  progressEl.style.width = Math.max(0, Math.min(100, pct)) + "%";
+}
+
+function flagImg(code, alt) {
+  return `<img src="https://flagcdn.com/w640/${code}.png"
+    srcset="https://flagcdn.com/w320/${code}.png 320w, https://flagcdn.com/w640/${code}.png 640w, https://flagcdn.com/w1280/${code}.png 1280w"
+    sizes="(max-width: 600px) 90vw, 460px"
+    alt="${alt || 'flag'}" loading="eager" />`;
+}
+
+/* ---------------- ROUND FLOW ---------------- */
+function startRound() {
+  pool = buildPool();
+  if (pool.length === 0) {
+    content.innerHTML = `<p class="muted" style="text-align:center;">No flags match those filters.</p>`;
+    return;
+  }
+  roundLength = parseInt($("length").value, 10) || pool.length;
+  if (roundLength === 0 || mode === "marathon" || mode === "flashcard" || mode === "death") roundLength = pool.length;
+
+  queue = shuffle(pool).slice(0, roundLength);
+  roundIndex = 0;
+  roundScore = 0;
+  roundStreak = 0;
+  roundRight = 0;
+  roundWrong = 0;
+  missed = [];
+  deathStreak = 0;
+  if (mode === "death") {
+    deathRunSettings = {
+      timer: parseInt($("deathTimer").value, 10) || 5,
+      region: $("region").value,
+      difficulty: $("difficulty").value,
+      choices: getChoiceCount()
+    };
+  } else {
+    deathRunSettings = null;
+  }
+  awaitingNext = false;
+  setProgress(0);
+  updateStats();
+  nextQuestion();
+}
+
+function nextQuestion() {
+  stopTimer();
+  stopLiveTicker();
+  if (roundIndex >= queue.length) return endRound();
+  current = queue[roundIndex];
+  setProgress((roundIndex / queue.length) * 100);
+  if (mode === "multipleChoice") renderMultipleChoice();
+  else if (mode === "type")       renderType();
+  else if (mode === "reverse")    renderReverse();
+  else if (mode === "timed")      renderTimed();
+  else if (mode === "flashcard")  renderFlashcard();
+  else if (mode === "marathon")   renderMultipleChoice();
+  else if (mode === "death")      renderDeath();
+  else if (mode === "ranked")     renderRanked();
+  else if (mode === "timeattack") renderTimeAttack();
+  else if (mode === "daily")      renderDaily();
+  updateStats();
+}
+
+function recordAnswer(correct, country, speedBonus=0) {
+  const key = country.code;
+  state.seen[key] = state.seen[key] || { right: 0, wrong: 0 };
+  if (correct) {
+    state.seen[key].right++;
+    state.totalRight++;
+    roundRight++;
+    roundStreak++;
+    roundScore += 10 + Math.min(roundStreak, 10) + speedBonus;
+  } else {
+    state.seen[key].wrong++;
+    state.totalWrong++;
+    roundWrong++;
+    roundStreak = 0;
+    missed.push(country);
+  }
+  if (roundScore > state.best) state.best = roundScore;
+  saveState();
+  updateStats();
+}
+
+function endRound() {
+  setProgress(100);
+  stopTimer();
+  const total = roundRight + roundWrong;
+  const acc = total ? Math.round(100 * roundRight / total) : 0;
+  if (mode === "death") recordDeathRun();
+  if (mode === "ranked") return endRankedRound();
+  if (mode === "timeattack") return endTimeAttackRound();
+  if (mode === "daily") return endDailyRound();
+
+  let missedHTML = "";
+  if (missed.length) {
+    missedHTML = `
+      <h3 style="margin-top:24px;">Missed (${missed.length}) — review these:</h3>
+      <div class="missed-list">
+        ${missed.map(c => `
+          <div class="missed"><img src="https://flagcdn.com/w160/${c.code}.png" alt="${c.name}"><span>${c.name}</span></div>
+        `).join("")}
+      </div>`;
+  }
+  const isDeath = mode === "death";
+  content.innerHTML = `
+    <div class="end-screen">
+      <h2>${isDeath ? "☠ You died" : "Round complete"}</h2>
+      <div class="big-score">${isDeath ? deathStreak : roundScore}</div>
+      <div class="muted">${isDeath ? `Survived ${deathStreak} flag${deathStreak===1?"":"s"} · Score ${roundScore}` : `${roundRight} right · ${roundWrong} wrong · ${acc}% accuracy`}</div>
+      ${isDeath ? `<div id="deathSubmit"></div>` : ""}
+      <div class="row" style="margin-top:18px;">
+        <button class="primary" id="again">Play again</button>
+        ${missed.length ? '<button id="reviewMissed">Drill missed flags</button>' : ''}
+      </div>
+      ${missedHTML}
+      ${isDeath ? renderDeathScoreboard() : ""}
+    </div>
+  `;
+  if (isDeath) wireDeathScoreboardClear();
+  $("again").onclick = () => startRound();
+  if (isDeath && deathStreak > 0) submitDeathScore();
+  const rm = $("reviewMissed");
+  if (rm) rm.onclick = () => {
+    pool = missed.slice();
+    queue = shuffle(pool);
+    roundLength = queue.length;
+    roundIndex = 0; roundScore = 0; roundStreak = 0; roundRight = 0; roundWrong = 0;
+    missed = [];
+    setProgress(0);
+    nextQuestion();
+  };
+}
+
+/* ---------------- RANKED / TIME ATTACK END ROUND ---------------- */
+function endRankedRound() {
+  const ranking = calcRanking(rankedTimings);
+  if (!ranking) return;
+  const placement = {
+    date: Date.now(),
+    perFlag: rankedTimings,
+    accuracy: ranking.accuracy,
+    avgTime: ranking.avgTime,
+    avgCorrectTime: ranking.avgCorrectTime,
+    rating: ranking.rating,
+    tier: ranking.tier,
+    right: ranking.right,
+    wrong: ranking.wrong,
+    total: ranking.total
+  };
+  state.ranked = state.ranked || { history: [] };
+  state.ranked.history = state.ranked.history || [];
+  const prevRating = state.ranked.rating;
+  state.ranked.placement = placement;
+  state.ranked.placementDone = true;
+  state.ranked.rating = ranking.rating;
+  state.ranked.tier = ranking.tier ? ranking.tier.name : null;
+  state.ranked.history.push({
+    date: placement.date,
+    rating: ranking.rating,
+    tier: ranking.tier ? ranking.tier.name : null,
+    accuracy: ranking.accuracy,
+    avgTime: ranking.avgTime
+  });
+  saveState();
+
+  let deltaHTML = "";
+  if (prevRating != null) {
+    const d = ranking.rating - prevRating;
+    deltaHTML = `<div class="muted" style="margin-top:6px;">${d >= 0 ? "▲" : "▼"} ${d >= 0 ? "+" : ""}${d} from last placement (${prevRating})</div>`;
+  }
+
+  content.innerHTML = `
+    <div class="end-screen">
+      <h2>Placement complete</h2>
+      <div style="display:flex; justify-content:center; margin: 14px 0;">
+        ${tierBadgeHTML(ranking.tier, ranking.rating, "padding: 28px 36px;")}
+      </div>
+      ${deltaHTML}
+      <div id="rankedSubmit"></div>
+      <div class="row" style="margin-top:14px;">
+        <button class="primary" id="again">Re-place</button>
+        <button id="drillWeak">Drill weakest flags</button>
+        <button id="rankedLb">View global ranking</button>
+      </div>
+      ${renderRankedDashboard(placement)}
+    </div>
+  `;
+  $("again").onclick = () => startRankedPlacement();
+  $("drillWeak").onclick = () => drillRankedWeakness();
+  $("rankedLb").onclick = () => showLeaderboardView("ranked", "global");
+  submitRankedScore(placement);
+}
+async function submitRankedScore(placement) {
+  const wrap = document.getElementById("rankedSubmit");
+  if (!wrap) return;
+  if (!getUsername()) { wrap.innerHTML = submitResultHTML({ error: "no_username" }); wireInlineSetName(() => submitRankedScore(placement)); return; }
+  wrap.innerHTML = `<div class="submit-result">Submitting to global ranking…</div>`;
+  const r = await apiSubmit("ranked", "global", placement.rating, {
+    tier: placement.tier ? placement.tier.name : null,
+    accuracy: Math.round(placement.accuracy * 100),
+    avgTime: Math.round(placement.avgTime)
+  });
+  if (wrap && wrap.isConnected) { wrap.innerHTML = submitResultHTML(r, true); wireInlineSetName(() => submitRankedScore(placement)); }
+}
+
+function endTimeAttackRound() {
+  const ta = state.timeAttack;
+  ta.history = ta.history || [];
+  ta.bestTotalMs = ta.bestTotalMs || {};
+  const prevBest = ta.bestTotalMs[taPoolKey];
+  const newBest = prevBest == null || taTotalMs < prevBest;
+  if (newBest) ta.bestTotalMs[taPoolKey] = taTotalMs;
+  const run = {
+    date: Date.now(),
+    poolKey: taPoolKey,
+    totalMs: taTotalMs,
+    errors: taErrors,
+    pbsHit: taPbsHit,
+    flags: Object.keys(taPerFlag).length + taErrors
+  };
+  ta.history.push(run);
+  ta.history = ta.history.slice(-100);
+  saveState();
+
+  const flagsThisRun = Object.entries(taPerFlag).sort((a,b)=>a[1]-b[1]);
+  content.innerHTML = `
+    <div class="end-screen">
+      <h2>⏱ Time Attack — done</h2>
+      <div class="big-score">${fmtTotal(taTotalMs)}</div>
+      <div class="muted">${taErrors} error${taErrors===1?"":"s"} (+${taErrors*5}s) · ${taPbsHit} new PB${taPbsHit===1?"":"s"} · ${queue.length} flag${queue.length===1?"":"s"}</div>
+      ${newBest ? `<div style="color:var(--accent-2); font-weight:700; margin-top:8px;">🏁 NEW BEST TOTAL ⚡</div>` : (prevBest != null ? `<div class="muted" style="margin-top:6px;">Best for this pool: ${fmtTotal(prevBest)} (${fmtTotal(taTotalMs - prevBest)} ${taTotalMs > prevBest ? "slower" : "faster"})</div>` : "")}
+      <div id="taSubmit"></div>
+      <div class="row" style="margin-top:14px;">
+        <button class="primary" id="again">Run again</button>
+        <button id="taIntro">Back to summary</button>
+        <button id="taLb">View leaderboard</button>
+      </div>
+      ${flagsThisRun.length ? `
+        <h3 style="margin-top:22px;">Your times this run (sorted fastest → slowest)</h3>
+        <div class="missed-list">
+          ${flagsThisRun.map(([code,t]) => {
+            const pb = state.timeAttack.bestPerFlag[code];
+            const pbMark = pb === t ? ` <small style="color:var(--accent-2)">PB</small>` : "";
+            return `<div class="missed"><img src="https://flagcdn.com/w160/${code}.png" alt=""><span>${nameByCode(code)}<br><small class="muted">${fmtTime(t)}${pbMark}</small></span></div>`;
+          }).join("")}
+        </div>` : ""}
+    </div>
+  `;
+  $("again").onclick = () => startTimeAttack();
+  $("taIntro").onclick = () => showTimeAttackIntro();
+  $("taLb").onclick = () => showLeaderboardView("timeattack", taPoolKey);
+  submitTimeAttackScore();
+}
+async function submitTimeAttackScore() {
+  const wrap = document.getElementById("taSubmit");
+  if (!wrap) return;
+  if (!getUsername()) { wrap.innerHTML = submitResultHTML({ error: "no_username" }); wireInlineSetName(submitTimeAttackScore); return; }
+  wrap.innerHTML = `<div class="submit-result">Submitting to global leaderboard…</div>`;
+  const r = await apiSubmit("timeattack", taPoolKey, taTotalMs, {
+    errors: taErrors,
+    flags: queue.length,
+    pbsHit: taPbsHit
+  });
+  if (wrap && wrap.isConnected) { wrap.innerHTML = submitResultHTML(r, false); wireInlineSetName(submitTimeAttackScore); }
+}
+
+/* ---------------- MULTIPLE CHOICE ---------------- */
+function getChoiceCount() {
+  return parseInt(document.getElementById("choiceCount").value, 10) || 4;
+}
+function renderMultipleChoice() {
+  const n = getChoiceCount();
+  const distractors = pickRandom(COUNTRIES.map(([c,n,r,d]) => ({code:c,name:n,region:r,difficulty:d})), n - 1, current);
+  const options = shuffle([current, ...distractors]);
+  content.innerHTML = `
+    <div class="flag-wrap">${flagImg(current.code, "Flag")}</div>
+    <div class="prompt">Which country flies this flag? <span class="badge">${roundIndex+1}/${queue.length}</span></div>
+    <div class="answer-area">
+      <div class="choices" id="choices">
+        ${options.map((o,i) => `<button class="choice" data-code="${o.code}" data-i="${i}"><b>${i+1}.</b> ${o.name}</button>`).join("")}
+      </div>
+      <div class="row"><button id="dontKnowBtn">I don't know</button></div>
+      <div class="feedback" id="fb"></div>
+    </div>
+  `;
+  bindChoices(options);
+  $("dontKnowBtn").onclick = handleDontKnow;
+}
+function bindChoices(options) {
+  const choices = content.querySelectorAll(".choice");
+  choices.forEach(btn => {
+    btn.addEventListener("click", () => handleChoice(btn, options));
+  });
+}
+function handleDontKnow() {
+  if (awaitingNext) return;
+  awaitingNext = true;
+  stopTimer();
+  recordAnswer(false, current);
+  content.querySelectorAll(".choice").forEach(b => {
+    b.classList.add("disabled");
+    if (b.dataset.code === current.code) b.classList.add("correct");
+  });
+  const dk = $("dontKnowBtn"); if (dk) dk.disabled = true;
+  $("fb").innerHTML = `<span class="bad">Answer: <b>${current.name}</b> <button id="nxt" class="primary" style="margin-left:8px;">Next →</button></span>`;
+  $("nxt").focus();
+  $("nxt").onclick = advance;
+}
+function handleChoice(btn, options) {
+  if (awaitingNext) return;
+  awaitingNext = true;
+  const code = btn.dataset.code;
+  const correct = code === current.code;
+  recordAnswer(correct, current);
+  content.querySelectorAll(".choice").forEach(b => {
+    b.classList.add("disabled");
+    if (b.dataset.code === current.code) b.classList.add("correct");
+    else if (b === btn && !correct) b.classList.add("wrong");
+  });
+  const fb = $("fb");
+  fb.innerHTML = correct
+    ? `<span class="good">Correct! <button id="nxt" class="primary" style="margin-left:8px;">Next →</button></span>`
+    : `<span class="bad">Answer: <b>${current.name}</b> <button id="nxt" class="primary" style="margin-left:8px;">Next →</button></span>`;
+  $("nxt").focus();
+  $("nxt").onclick = advance;
+}
+
+/* ---------------- TYPE MODE ---------------- */
+function renderType() {
+  content.innerHTML = `
+    <div class="flag-wrap">${flagImg(current.code, "Flag")}</div>
+    <div class="prompt">Type the country name <span class="badge">${roundIndex+1}/${queue.length}</span></div>
+    <div class="answer-area">
+      <input type="text" class="type-input" id="typeInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Country name..." />
+      <div class="feedback" id="fb"></div>
+      <div class="row">
+        <button id="skipBtn">I don't know</button>
+        <button class="primary" id="submitBtn">Submit</button>
+      </div>
+    </div>
+  `;
+  const inp = $("typeInput");
+  inp.focus();
+  inp.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submit();
+  });
+  $("submitBtn").onclick = submit;
+  $("skipBtn").onclick = () => { handleTypeResult(false, true); };
+  function submit() {
+    if (awaitingNext) return;
+    const val = inp.value;
+    const ok = isCorrectName(val, current);
+    handleTypeResult(ok, false);
+  }
+}
+function handleTypeResult(ok, skipped) {
+  awaitingNext = true;
+  recordAnswer(ok, current);
+  const fb = $("fb");
+  if (ok) fb.innerHTML = `<span class="good">Correct — ${current.name}! <button id="nxt" class="primary" style="margin-left:8px;">Next →</button></span>`;
+  else fb.innerHTML = `<span class="bad">${skipped ? "Skipped" : "Not quite"} — answer: <b>${current.name}</b> <button id="nxt" class="primary" style="margin-left:8px;">Next →</button></span>`;
+  $("nxt").focus();
+  $("nxt").onclick = advance;
+}
+
+/* ---------------- REVERSE ---------------- */
+function renderReverse() {
+  const n = getChoiceCount();
+  const distractors = pickRandom(COUNTRIES.map(([c,n,r,d]) => ({code:c,name:n,region:r,difficulty:d})), n - 1, current);
+  const options = shuffle([current, ...distractors]);
+  content.innerHTML = `
+    <div style="text-align:center; padding: 28px 12px;">
+      <div class="prompt" style="font-size:14px;">Which flag belongs to...</div>
+      <div style="font-size:28px; font-weight:700; margin: 6px 0 18px;">${current.name}</div>
+    </div>
+    <div class="prompt"><span class="badge">${roundIndex+1}/${queue.length}</span></div>
+    <div class="answer-area">
+      <div class="choices" id="choices" style="grid-template-columns:1fr 1fr;">
+        ${options.map((o,i) => `
+          <button class="choice" data-code="${o.code}" data-i="${i}" style="display:flex; align-items:center; gap:10px;">
+            <span style="font-weight:700;">${i+1}.</span>
+            <img src="https://flagcdn.com/w160/${o.code}.png" alt="flag option" style="width:80px; height:auto; border-radius:3px; background:#fff;" />
+          </button>`).join("")}
+      </div>
+      <div class="row"><button id="dontKnowBtn">I don't know</button></div>
+      <div class="feedback" id="fb"></div>
+    </div>
+  `;
+  bindChoices(options);
+  $("dontKnowBtn").onclick = handleDontKnow;
+}
+
+/* ---------------- TIMED ---------------- */
+function renderTimed() {
+  const n = getChoiceCount();
+  const distractors = pickRandom(COUNTRIES.map(([c,n,r,d]) => ({code:c,name:n,region:r,difficulty:d})), n - 1, current);
+  const options = shuffle([current, ...distractors]);
+  content.innerHTML = `
+    <div class="timer-bar"><div id="tbar"></div></div>
+    <div class="flag-wrap">${flagImg(current.code, "Flag")}</div>
+    <div class="prompt">Quick! <span class="badge">${roundIndex+1}/${queue.length}</span> · <span class="timer-text" id="ttext">8.0s</span></div>
+    <div class="answer-area">
+      <div class="choices" id="choices">
+        ${options.map((o,i) => `<button class="choice" data-code="${o.code}" data-i="${i}"><b>${i+1}.</b> ${o.name}</button>`).join("")}
+      </div>
+      <div class="row"><button id="dontKnowBtn">I don't know</button></div>
+      <div class="feedback" id="fb"></div>
+    </div>
+  `;
+  $("dontKnowBtn").onclick = handleDontKnow;
+  startTimer(8000, () => {
+    if (awaitingNext) return;
+    awaitingNext = true;
+    recordAnswer(false, current);
+    content.querySelectorAll(".choice").forEach(b => {
+      b.classList.add("disabled");
+      if (b.dataset.code === current.code) b.classList.add("correct");
+    });
+    $("fb").innerHTML = `<span class="bad">Time's up — <b>${current.name}</b> <button id="nxt" class="primary" style="margin-left:8px;">Next →</button></span>`;
+    $("nxt").focus();
+    $("nxt").onclick = advance;
+  });
+  const choices = content.querySelectorAll(".choice");
+  choices.forEach(btn => {
+    btn.addEventListener("click", () => handleTimedChoice(btn, options));
+  });
+}
+function handleTimedChoice(btn, options) {
+  if (awaitingNext) return;
+  awaitingNext = true;
+  const elapsed = Date.now() - timerStart;
+  const remaining = Math.max(0, timerDuration - elapsed);
+  const speedBonus = Math.round((remaining / timerDuration) * 10);
+  stopTimer();
+  const code = btn.dataset.code;
+  const correct = code === current.code;
+  recordAnswer(correct, current, correct ? speedBonus : 0);
+  content.querySelectorAll(".choice").forEach(b => {
+    b.classList.add("disabled");
+    if (b.dataset.code === current.code) b.classList.add("correct");
+    else if (b === btn && !correct) b.classList.add("wrong");
+  });
+  $("fb").innerHTML = correct
+    ? `<span class="good">+${10 + Math.min(roundStreak,10) + speedBonus} pts (speed +${speedBonus}) <button id="nxt" class="primary" style="margin-left:8px;">Next →</button></span>`
+    : `<span class="bad">Answer: <b>${current.name}</b> <button id="nxt" class="primary" style="margin-left:8px;">Next →</button></span>`;
+  $("nxt").focus();
+  $("nxt").onclick = advance;
+}
+/* ---------------- DEATH MODE ---------------- */
+let deathStreak = 0;
+let deathRunSettings = null;
+let lastDeathRunDate = null;
+
+/* ---------------- RANKED & TIME ATTACK STATE ---------------- */
+let rankedTimings = {};   // code -> {time, correct}
+let qStart = 0;           // start time for the current question (ranked / time attack)
+let taPerFlag = {};       // time attack: code -> ms this run
+let taTotalMs = 0;
+let taErrors = 0;
+let taPbsHit = 0;
+let taPoolKey = "";       // identifier for the pool config used
+
+/* ---------------- DAILY MODE STATE ---------------- */
+let dailyPerFlag = {};
+let dailyTotalMs = 0;
+let dailyErrors = 0;
+let dailyDateStr = "";
+const DAILY_COUNT = 25;
+
+/* ---------------- USERNAME / API ---------------- */
+const USER_KEY = "flagmaster.username";
+function getUsername() { try { return localStorage.getItem(USER_KEY) || ""; } catch { return ""; } }
+function setUsername(name) {
+  try { localStorage.setItem(USER_KEY, name); } catch {}
+  refreshUserLabel();
+}
+function refreshUserLabel() {
+  const el = document.getElementById("userLabel");
+  const name = getUsername();
+  if (el) el.textContent = name ? "@" + name : "Set name";
+}
+function validUsername(s) {
+  if (typeof s !== "string") return false;
+  const n = s.trim();
+  return /^[A-Za-z0-9_\-]{2,20}$/.test(n);
+}
+function openUserModal(onSave) {
+  const modal = document.getElementById("userModal");
+  const input = document.getElementById("userInput");
+  const err = document.getElementById("userError");
+  err.textContent = "";
+  input.value = getUsername();
+  modal.classList.add("open");
+  setTimeout(() => input.focus(), 30);
+  function close() {
+    modal.classList.remove("open");
+    document.getElementById("userSave").onclick = null;
+    document.getElementById("userCancel").onclick = null;
+    input.onkeydown = null;
+  }
+  function save() {
+    const v = input.value.trim();
+    if (!validUsername(v)) { err.textContent = "2-20 characters, letters/numbers/underscore/dash only."; return; }
+    setUsername(v);
+    close();
+    if (onSave) onSave(v);
+  }
+  document.getElementById("userSave").onclick = save;
+  document.getElementById("userCancel").onclick = close;
+  input.onkeydown = (e) => { if (e.key === "Enter") save(); if (e.key === "Escape") close(); };
+}
+
+async function apiSubmit(mode, board, score, meta) {
+  const username = getUsername();
+  if (!username) return { error: "no_username" };
+  try {
+    const r = await fetch("/api/leaderboard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode, board, score, username, meta })
+    });
+    if (!r.ok) return { error: "http_" + r.status, status: r.status, body: await safeText(r) };
+    return await r.json();
+  } catch (e) { return { error: "network", detail: String(e) }; }
+}
+async function apiFetch(mode, board, limit = 50) {
+  try {
+    const r = await fetch(`/api/leaderboard?mode=${encodeURIComponent(mode)}&board=${encodeURIComponent(board || "global")}&limit=${limit}`);
+    if (!r.ok) return { error: "http_" + r.status };
+    return await r.json();
+  } catch (e) { return { error: "network" }; }
+}
+async function safeText(r) { try { return await r.text(); } catch { return ""; } }
+
+/* Inline component for showing submit results */
+function submitResultHTML(result, higher) {
+  if (!result) return "";
+  if (result.error === "no_username") {
+    return `<div class="submit-result fail">Set a name to submit to the global leaderboard. <button id="setNameInline" class="head-btn" style="margin-left:8px;">Set name</button></div>`;
+  }
+  if (result.error) {
+    return `<div class="submit-result fail">Couldn't reach the leaderboard server (${result.error}). Score saved locally.</div>`;
+  }
+  const rankPart = result.rank ? `<b>#${result.rank}</b> of ${result.total}` : "";
+  if (result.accepted) {
+    return `<div class="submit-result ok">🎉 Submitted as <b>@${getUsername()}</b> — ${rankPart}${result.previousBest != null ? ` (previous best: ${result.previousBest})` : ""}</div>`;
+  } else {
+    return `<div class="submit-result">Not your best — kept previous record (${rankPart}).</div>`;
+  }
+}
+function wireInlineSetName(reSubmitFn) {
+  const btn = document.getElementById("setNameInline");
+  if (btn) btn.onclick = () => openUserModal(() => reSubmitFn && reSubmitFn());
+}
+
+function recordDeathRun() {
+  state.deathScores = state.deathScores || [];
+  const run = {
+    survived: deathStreak,
+    timer: deathRunSettings ? deathRunSettings.timer : null,
+    region: deathRunSettings ? deathRunSettings.region : "all",
+    difficulty: deathRunSettings ? deathRunSettings.difficulty : "all",
+    choices: deathRunSettings ? deathRunSettings.choices : 4,
+    date: Date.now()
+  };
+  lastDeathRunDate = run.date;
+  state.deathScores.push(run);
+  // Sort by survived desc, then earliest date (older record wins ties)
+  state.deathScores.sort((a, b) => (b.survived - a.survived) || (a.date - b.date));
+  // Keep top 50
+  state.deathScores = state.deathScores.slice(0, 50);
+  saveState();
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  const pad = (n) => n < 10 ? "0"+n : ""+n;
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function renderDeathScoreboard(limit = 10) {
+  const scores = (state.deathScores || []).slice(0, limit);
+  if (!scores.length) {
+    return `<p class="muted" style="text-align:center; margin: 10px 0;">No death runs yet — survive a round to set your first score.</p>`;
+  }
+  return `
+    <h3 style="margin: 24px 0 8px; text-align:left;">☠ Death Mode — Best Runs</h3>
+    <div class="scoreboard">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Survived</th><th>Timer</th><th>Region</th><th>Difficulty</th><th>Choices</th><th>Completed</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${scores.map((s, i) => `
+            <tr class="${s.date === lastDeathRunDate ? 'highlight' : ''}">
+              <td>${i+1}</td>
+              <td><b>${s.survived}</b></td>
+              <td>${s.timer ?? "—"}s</td>
+              <td>${s.region}</td>
+              <td>${s.difficulty}</td>
+              <td>${s.choices}</td>
+              <td>${formatDate(s.date)}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="row" style="margin-top:10px; justify-content:flex-end;">
+      <button id="clearDeathScores" style="font-size:12px;">Clear death scoreboard</button>
+    </div>
+  `;
+}
+function wireDeathScoreboardClear() {
+  const btn = $("clearDeathScores");
+  if (!btn) return;
+  btn.onclick = () => {
+    if (!confirm("Clear all death mode scores?")) return;
+    state.deathScores = [];
+    lastDeathRunDate = null;
+    saveState();
+    // re-render whatever screen is showing — easiest: re-trigger current screen
+    if (mode === "death" && roundIndex >= queue.length) endRound();
+    else showDeathIntro();
+  };
+}
+
+function showDeathIntro() {
+  setProgress(0);
+  content.innerHTML = `
+    <div class="end-screen">
+      <h2>☠ Death Mode</h2>
+      <p class="muted">Sudden death. Timer resets on every correct answer. One mistake or timeout ends the run.</p>
+      <div class="row" style="margin-top:14px;">
+        <button class="primary" id="startDeath">Start death run</button>
+      </div>
+      ${renderDeathScoreboard()}
+    </div>
+  `;
+  $("startDeath").onclick = () => startRound();
+  wireDeathScoreboardClear();
+}
+
+function renderDeath() {
+  const n = getChoiceCount();
+  const distractors = pickRandom(COUNTRIES.map(([c,n,r,d]) => ({code:c,name:n,region:r,difficulty:d})), n - 1, current);
+  const options = shuffle([current, ...distractors]);
+  const deathSecs = parseInt($("deathTimer").value, 10) || 5;
+  content.innerHTML = `
+    <div class="timer-bar"><div id="tbar"></div></div>
+    <div class="flag-wrap">${flagImg(current.code, "Flag")}</div>
+    <div class="prompt">☠ Death mode — survived: <b style="color:var(--accent-2)">${deathStreak}</b> · <span class="timer-text" id="ttext">${deathSecs}.0s</span></div>
+    <div class="answer-area">
+      <div class="choices" id="choices">
+        ${options.map((o,i) => `<button class="choice" data-code="${o.code}" data-i="${i}"><b>${i+1}.</b> ${o.name}</button>`).join("")}
+      </div>
+      <div class="feedback" id="fb"></div>
+    </div>
+  `;
+  startTimer(deathSecs * 1000, () => handleDeath(null, true));
+  content.querySelectorAll(".choice").forEach(btn => {
+    btn.addEventListener("click", () => handleDeath(btn, false));
+  });
+}
+function handleDeath(btn, timedOut) {
+  if (awaitingNext) return;
+  awaitingNext = true;
+  stopTimer();
+  const correct = !timedOut && btn && btn.dataset.code === current.code;
+  if (correct) {
+    recordAnswer(true, current);
+    deathStreak++;
+    btn.classList.add("correct");
+    // brief pause then advance — timer resets next render
+    setTimeout(() => advance(), 200);
+  } else {
+    recordAnswer(false, current);
+    content.querySelectorAll(".choice").forEach(b => {
+      b.classList.add("disabled");
+      if (b.dataset.code === current.code) b.classList.add("correct");
+      else if (b === btn) b.classList.add("wrong");
+    });
+    $("fb").innerHTML = `<span class="bad">☠ ${timedOut ? "Time's up" : "Wrong"} — answer was <b>${current.name}</b>. You survived <b>${deathStreak}</b> flags. <button id="nxt" class="primary" style="margin-left:8px;">See results →</button></span>`;
+    $("nxt").focus();
+    $("nxt").onclick = endDeathRun;
+  }
+}
+function endDeathRun() {
+  // Jump straight to end screen
+  awaitingNext = false;
+  roundIndex = queue.length;
+  endRound();
+}
+async function submitDeathScore() {
+  const wrap = document.getElementById("deathSubmit");
+  if (!wrap) return;
+  if (!getUsername()) {
+    wrap.innerHTML = submitResultHTML({ error: "no_username" });
+    wireInlineSetName(submitDeathScore);
+    return;
+  }
+  wrap.innerHTML = `<div class="submit-result">Submitting to global leaderboard…</div>`;
+  const settings = deathRunSettings || { timer: 5, region: "all", difficulty: "all", choices: 4 };
+  const r = await apiSubmit("death", String(settings.timer), deathStreak, {
+    region: settings.region, difficulty: settings.difficulty, choices: settings.choices
+  });
+  if (wrap && wrap.isConnected) {
+    wrap.innerHTML = submitResultHTML(r, true);
+    wireInlineSetName(submitDeathScore);
+  }
+}
+
+/* ---------------- RANKED MODE ---------------- */
+function tierBadgeHTML(tier, rating, sizeStyle = "") {
+  if (!tier) return `<div class="tier-badge" style="${sizeStyle}">Unranked</div>`;
+  return `
+    <div class="tier-badge" style="background:${tier.gradient}; ${sizeStyle}">
+      <div class="tier-name">${tier.name}</div>
+      ${rating != null ? `<div class="tier-rating">${rating}</div>` : ""}
+    </div>`;
+}
+
+function showRankedIntro() {
+  setProgress(0);
+  const r = state.ranked || {};
+  const placed = !!r.placementDone;
+  let dash = "";
+  if (placed && r.placement) dash = renderRankedDashboard(r.placement);
+  content.innerHTML = `
+    <div class="end-screen">
+      <h2>🏆 Ranked</h2>
+      <p class="muted">${placed
+        ? "Re-place to refresh your rank, or drill your weakest flags."
+        : "Placement runs through all 197 flags with a 15-second cap on each. Your rank is based on accuracy and speed."}</p>
+      <div class="row" style="margin-top:14px;">
+        <button class="primary" id="startRanked">${placed ? "Re-place (all 197 flags)" : "Start placement (all 197 flags)"}</button>
+        ${placed && r.placement ? `<button id="drillWeak">Drill weakest flags</button>` : ""}
+      </div>
+      ${dash}
+    </div>
+  `;
+  $("startRanked").onclick = () => startRankedPlacement();
+  const dw = $("drillWeak");
+  if (dw) dw.onclick = () => drillRankedWeakness();
+}
+
+function startRankedPlacement() {
+  pool = COUNTRIES.map(([c,n,r,d]) => ({ code: c, name: n, region: r, difficulty: d }));
+  queue = shuffle(pool);
+  roundLength = queue.length;
+  roundIndex = 0; roundScore = 0; roundStreak = 0; roundRight = 0; roundWrong = 0;
+  missed = []; deathStreak = 0; deathRunSettings = null;
+  rankedTimings = {};
+  awaitingNext = false;
+  setProgress(0);
+  updateStats();
+  nextQuestion();
+}
+
+function renderRanked() {
+  const n = getChoiceCount();
+  const distractors = pickRandom(COUNTRIES.map(([c,nm,r,d]) => ({code:c,name:nm,region:r,difficulty:d})), n - 1, current);
+  const options = shuffle([current, ...distractors]);
+  qStart = Date.now();
+  content.innerHTML = `
+    <div class="timer-bar"><div id="tbar"></div></div>
+    <div class="flag-wrap">${flagImg(current.code, "Flag")}</div>
+    <div class="prompt">🏆 Ranked placement — flag <b>${roundIndex+1}</b>/<b>${queue.length}</b> · <span class="timer-text" id="ttext">15.0s</span></div>
+    <div class="answer-area">
+      <div class="choices" id="choices">
+        ${options.map((o,i) => `<button class="choice" data-code="${o.code}" data-i="${i}"><b>${i+1}.</b> ${o.name}</button>`).join("")}
+      </div>
+      <div class="row"><button id="dontKnowBtn">I don't know</button></div>
+      <div class="feedback" id="fb"></div>
+    </div>
+  `;
+  startTimer(15000, () => handleRanked(null, true));
+  content.querySelectorAll(".choice").forEach(btn => {
+    btn.addEventListener("click", () => handleRanked(btn, false));
+  });
+  $("dontKnowBtn").onclick = () => handleRanked(null, false, true);
+}
+function handleRanked(btn, timedOut, gaveUp) {
+  if (awaitingNext) return;
+  awaitingNext = true;
+  const elapsed = Math.min(15000, Date.now() - qStart);
+  stopTimer();
+  const correct = !timedOut && !gaveUp && btn && btn.dataset.code === current.code;
+  rankedTimings[current.code] = { time: elapsed, correct };
+  recordAnswer(correct, current);
+  content.querySelectorAll(".choice").forEach(b => {
+    b.classList.add("disabled");
+    if (b.dataset.code === current.code) b.classList.add("correct");
+    else if (b === btn && !correct) b.classList.add("wrong");
+  });
+  const pts = rateAnswer(correct, elapsed);
+  $("fb").innerHTML = `<span class="${correct?'good':'bad'}">${correct ? `+${pts}` : (timedOut?'Time up':'0 pts')} — ${current.name} (${fmtTime(elapsed)})</span>`;
+  setTimeout(() => advance(), 450);
+}
+
+function renderRankedDashboard(placement) {
+  const tier = placement.tier || getTier(placement.rating);
+  const region = regionBreakdown(placement.perFlag);
+  const wrongList = Object.entries(placement.perFlag).filter(([c,i]) => !i.correct).map(([c,i]) => ({code:c, ...i}));
+  const correctList = Object.entries(placement.perFlag).filter(([c,i]) => i.correct).map(([c,i]) => ({code:c, ...i}));
+  correctList.sort((a,b) => b.time - a.time);
+  const slowest = correctList.slice(0, 10);
+  const fastest = correctList.slice().sort((a,b) => a.time - b.time).slice(0, 5);
+
+  // Weakest region (lowest accuracy, tiebreak slowest)
+  let weakest = null;
+  for (const [r, stats] of Object.entries(region)) {
+    const acc = stats.right / stats.total;
+    const avg = stats.sumTime / stats.total;
+    if (!weakest || acc < weakest.acc || (acc === weakest.acc && avg > weakest.avg)) {
+      weakest = { region: r, acc, avg };
+    }
+  }
+
+  const tipParts = [];
+  if (placement.accuracy < 0.85) tipParts.push(`Accuracy is the fastest way to climb — relearn the <b>${wrongList.length}</b> flag${wrongList.length===1?"":"s"} you missed.`);
+  if (placement.avgCorrectTime > 3000) tipParts.push(`Drill your <b>slowest</b> correct answers to push average response time down.`);
+  if (placement.avgCorrectTime <= 1500 && placement.accuracy >= 0.95) tipParts.push(`You're already sharp — try increasing choice count to 5 to keep climbing.`);
+  if (weakest) tipParts.push(`Weakest region: <b>${weakest.region}</b> (${Math.round(weakest.acc*100)}% acc, ${fmtTime(weakest.avg)} avg).`);
+
+  const nextTier = TIERS.find(t => t.min > placement.rating);
+  const pointsToNext = nextTier ? nextTier.min - placement.rating : 0;
+
+  return `
+    <div class="ranked-dashboard">
+      <div class="ranked-header">
+        ${tierBadgeHTML(tier, placement.rating, "padding: 22px 28px;")}
+        <div class="ranked-summary">
+          <div class="stat-grid">
+            <div><span class="muted">Accuracy</span><b>${Math.round(placement.accuracy*100)}%</b></div>
+            <div><span class="muted">Avg time</span><b>${fmtTime(placement.avgTime)}</b></div>
+            <div><span class="muted">Avg (correct)</span><b>${fmtTime(placement.avgCorrectTime)}</b></div>
+            <div><span class="muted">Correct</span><b>${placement.right}/${placement.total}</b></div>
+          </div>
+          ${nextTier ? `<div class="next-tier">Next: <b style="color:${nextTier.color}">${nextTier.name}</b> — <b>${pointsToNext}</b> rating to go</div>` : `<div class="next-tier">You're at the top of the ladder. Maintain by re-placing.</div>`}
+          <div class="muted" style="font-size:12px; margin-top:6px;">Placed ${formatDate(placement.date)}</div>
+        </div>
+      </div>
+
+      ${tipParts.length ? `<div class="improve-box"><b>How to improve:</b><ul>${tipParts.map(t => `<li>${t}</li>`).join("")}</ul></div>` : ""}
+
+      <h3 style="margin-top:22px;">By region</h3>
+      <div class="scoreboard">
+        <table>
+          <thead><tr><th>Region</th><th>Accuracy</th><th>Avg time</th><th>Right / total</th></tr></thead>
+          <tbody>
+            ${Object.entries(region).map(([r, s]) => `
+              <tr>
+                <td>${r}</td>
+                <td>${Math.round(s.right/s.total*100)}%</td>
+                <td>${fmtTime(s.sumTime/s.total)}</td>
+                <td>${s.right}/${s.total}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      ${slowest.length ? `
+        <h3 style="margin-top:22px;">Slowest correct — drill these for speed</h3>
+        <div class="missed-list">
+          ${slowest.map(s => `<div class="missed"><img src="https://flagcdn.com/w160/${s.code}.png" alt=""><span>${nameByCode(s.code)}<br><small class="muted">${fmtTime(s.time)}</small></span></div>`).join("")}
+        </div>` : ""}
+
+      ${wrongList.length ? `
+        <h3 style="margin-top:22px;">Missed (${wrongList.length}) — relearn</h3>
+        <div class="missed-list">
+          ${wrongList.map(s => `<div class="missed"><img src="https://flagcdn.com/w160/${s.code}.png" alt=""><span>${nameByCode(s.code)}</span></div>`).join("")}
+        </div>` : ""}
+
+      ${fastest.length ? `
+        <h3 style="margin-top:22px;">Fastest correct ⚡</h3>
+        <div class="missed-list">
+          ${fastest.map(s => `<div class="missed"><img src="https://flagcdn.com/w160/${s.code}.png" alt=""><span>${nameByCode(s.code)}<br><small class="muted">${fmtTime(s.time)}</small></span></div>`).join("")}
+        </div>` : ""}
+
+      ${state.ranked.history && state.ranked.history.length > 1 ? `
+        <h3 style="margin-top:22px;">Rank history</h3>
+        <div class="scoreboard">
+          <table>
+            <thead><tr><th>Date</th><th>Tier</th><th>Rating</th><th>Accuracy</th><th>Avg time</th></tr></thead>
+            <tbody>
+              ${state.ranked.history.slice().reverse().slice(0,10).map(h => `<tr><td>${formatDate(h.date)}</td><td style="color:${(getTier(h.rating)||{}).color}">${h.tier}</td><td><b>${h.rating}</b></td><td>${Math.round(h.accuracy*100)}%</td><td>${fmtTime(h.avgTime)}</td></tr>`).join("")}
+            </tbody>
+          </table>
+        </div>` : ""}
+    </div>
+  `;
+}
+
+function drillRankedWeakness() {
+  const p = state.ranked.placement;
+  if (!p) return;
+  const wrong = Object.entries(p.perFlag).filter(([c,i]) => !i.correct).map(([c]) => c);
+  const correct = Object.entries(p.perFlag).filter(([c,i]) => i.correct).map(([c,i]) => ({c, t: i.time}));
+  correct.sort((a,b) => b.t - a.t);
+  const slowCodes = correct.slice(0, 15).map(x => x.c);
+  const codes = Array.from(new Set([...wrong, ...slowCodes]));
+  if (!codes.length) { alert("No weak flags to drill — you're clean!"); return; }
+  mode = "multipleChoice";
+  renderModes();
+  pool = codes.map(code => {
+    const c = COUNTRIES.find(x => x[0] === code);
+    return { code, name: c[1], region: c[2], difficulty: c[3] };
+  });
+  queue = shuffle(pool);
+  roundLength = queue.length;
+  roundIndex = 0; roundScore = 0; roundStreak = 0; roundRight = 0; roundWrong = 0; missed = [];
+  awaitingNext = false;
+  setProgress(0);
+  updateStats();
+  nextQuestion();
+}
+
+/* ---------------- TIME ATTACK MODE ---------------- */
+function poolKeyForTA() {
+  return `${$("region").value}|${$("difficulty").value}|${getChoiceCount()}`;
+}
+function showTimeAttackIntro() {
+  setProgress(0);
+  const key = poolKeyForTA();
+  const ta = state.timeAttack;
+  const bestTotal = ta.bestTotalMs[key];
+  const history = (ta.history || []).filter(h => h.poolKey === key).slice().reverse().slice(0, 10);
+  const pbCount = Object.keys(ta.bestPerFlag || {}).length;
+  pool = buildPool();
+
+  content.innerHTML = `
+    <div class="end-screen">
+      <h2>⏱ Time Attack</h2>
+      <p class="muted">Race through every flag in the pool. Wrong answers add a 5-second penalty. Per-flag and total bests are saved.</p>
+      <div class="row" style="margin-top:14px;">
+        <button class="primary" id="startTA">Start time attack (${pool.length} flags)</button>
+      </div>
+      <div class="stat-grid" style="margin-top:18px;">
+        <div><span class="muted">Best total (this pool)</span><b>${fmtTotal(bestTotal)}</b></div>
+        <div><span class="muted">Per-flag PBs saved</span><b>${pbCount}</b></div>
+        <div><span class="muted">Pool</span><b>${$("region").value} · ${$("difficulty").value} · ${getChoiceCount()} choices</b></div>
+      </div>
+      ${history.length ? `
+        <h3 style="margin-top:22px;">Recent runs (this pool)</h3>
+        <div class="scoreboard">
+          <table>
+            <thead><tr><th>Date</th><th>Total</th><th>Errors</th><th>New PBs</th></tr></thead>
+            <tbody>
+              ${history.map(h => `<tr><td>${formatDate(h.date)}</td><td><b>${fmtTotal(h.totalMs)}</b></td><td>${h.errors}</td><td>${h.pbsHit}</td></tr>`).join("")}
+            </tbody>
+          </table>
+        </div>` : ""}
+      ${pbCount ? `
+        <h3 style="margin-top:22px;">Top per-flag PBs ⚡</h3>
+        <div class="missed-list">
+          ${Object.entries(ta.bestPerFlag).sort((a,b)=>a[1]-b[1]).slice(0,12).map(([code,t]) => `<div class="missed"><img src="https://flagcdn.com/w160/${code}.png" alt=""><span>${nameByCode(code)}<br><small class="muted">${fmtTime(t)}</small></span></div>`).join("")}
+        </div>` : ""}
+    </div>
+  `;
+  $("startTA").onclick = () => startTimeAttack();
+}
+function startTimeAttack() {
+  pool = buildPool();
+  if (!pool.length) { alert("No flags in that pool."); return; }
+  queue = shuffle(pool);
+  roundLength = queue.length;
+  roundIndex = 0; roundScore = 0; roundStreak = 0; roundRight = 0; roundWrong = 0;
+  missed = []; deathStreak = 0;
+  taPerFlag = {}; taTotalMs = 0; taErrors = 0; taPbsHit = 0;
+  taPoolKey = poolKeyForTA();
+  awaitingNext = false;
+  setProgress(0);
+  updateStats();
+  nextQuestion();
+}
+function renderTimeAttack() {
+  const n = getChoiceCount();
+  const distractors = pickRandom(COUNTRIES.map(([c,nm,r,d]) => ({code:c,name:nm,region:r,difficulty:d})), n - 1, current);
+  const options = shuffle([current, ...distractors]);
+  qStart = Date.now();
+  const bestTotal = state.timeAttack.bestTotalMs[taPoolKey];
+  content.innerHTML = `
+    <div class="flag-wrap">${flagImg(current.code, "Flag")}</div>
+    <div class="prompt">⏱ Time Attack — <b>${roundIndex+1}/${queue.length}</b> · This flag: <span class="live-ticker" id="taLive">0.00s</span> · Total: <b>${fmtTotal(taTotalMs)}</b>${bestTotal ? ` · PB: ${fmtTotal(bestTotal)}` : ""}</div>
+    <div class="answer-area">
+      <div class="choices" id="choices">
+        ${options.map((o,i) => `<button class="choice" data-code="${o.code}" data-i="${i}"><b>${i+1}.</b> ${o.name}</button>`).join("")}
+      </div>
+      <div class="feedback" id="fb"></div>
+    </div>
+  `;
+  startLiveTicker("taLive", qStart);
+  content.querySelectorAll(".choice").forEach(btn => {
+    btn.addEventListener("click", () => handleTimeAttack(btn));
+  });
+}
+function handleTimeAttack(btn) {
+  if (awaitingNext) return;
+  awaitingNext = true;
+  stopLiveTicker();
+  const elapsed = Date.now() - qStart;
+  const correct = btn.dataset.code === current.code;
+  recordAnswer(correct, current);
+  let pbHit = false;
+  if (correct) {
+    taPerFlag[current.code] = elapsed;
+    const prev = state.timeAttack.bestPerFlag[current.code];
+    if (!prev || elapsed < prev) {
+      state.timeAttack.bestPerFlag[current.code] = elapsed;
+      taPbsHit++;
+      pbHit = true;
+    }
+    taTotalMs += elapsed;
+  } else {
+    taErrors++;
+    taTotalMs += elapsed + 5000; // 5s penalty
+  }
+  saveState();
+  content.querySelectorAll(".choice").forEach(b => {
+    b.classList.add("disabled");
+    if (b.dataset.code === current.code) b.classList.add("correct");
+    else if (b === btn && !correct) b.classList.add("wrong");
+  });
+  const prev = state.timeAttack.bestPerFlag[current.code];
+  const diff = correct && prev != null && elapsed > prev ? ` <small class="muted">(+${fmtTime(elapsed - prev)} vs PB)</small>` : "";
+  $("fb").innerHTML = correct
+    ? `<span class="good">${fmtTime(elapsed)}${pbHit ? ' <b style="color:var(--accent-2)">NEW PB ⚡</b>' : diff}</span>`
+    : `<span class="bad">Wrong (+5s penalty) — ${current.name}</span>`;
+  setTimeout(() => advance(), correct ? 300 : 700);
+}
+
+/* ---------------- DAILY MODE ---------------- */
+function todayUTC() {
+  const d = new Date();
+  const y = d.getUTCFullYear(), m = d.getUTCMonth() + 1, day = d.getUTCDate();
+  return `${y}-${m<10?"0":""}${m}-${day<10?"0":""}${day}`;
+}
+function hashString(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function mulberry32(seed) {
+  return function() {
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function getDailyFlags(dateStr) {
+  // Deterministic for everyone on the same UTC date
+  const rng = mulberry32(hashString("flagmaster-daily-" + dateStr));
+  const all = COUNTRIES.map(([code, name, region, d]) => ({ code, name, region, difficulty: d }));
+  // Fisher-Yates with seeded RNG
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+  return all.slice(0, DAILY_COUNT);
+}
+
+function showDailyIntro() {
+  setProgress(0);
+  dailyDateStr = todayUTC();
+  content.innerHTML = `
+    <div class="end-screen">
+      <h2>📅 Daily Challenge</h2>
+      <p class="muted">25 flags. Same set for everyone in the world today (resets at 00:00 UTC). Race for the top spot.</p>
+      <div class="row" style="margin-top:10px;">
+        <button class="primary" id="startDaily">Start today's run</button>
+        <button id="viewDailyLb">View today's leaderboard</button>
+      </div>
+      <div class="muted" style="margin-top:12px; font-size:13px;">Date: <b>${dailyDateStr}</b> (UTC)</div>
+      <div id="dailyLb"></div>
+    </div>
+  `;
+  $("startDaily").onclick = () => startDaily();
+  $("viewDailyLb").onclick = () => showLeaderboardView("daily", dailyDateStr);
+  loadDailyLeaderboardPreview();
+}
+async function loadDailyLeaderboardPreview() {
+  const wrap = document.getElementById("dailyLb");
+  if (!wrap) return;
+  wrap.innerHTML = `<p class="muted" style="margin-top:14px;">Loading today's leaderboard…</p>`;
+  const r = await apiFetch("daily", dailyDateStr, 10);
+  if (!wrap.isConnected) return;
+  if (r.error) {
+    wrap.innerHTML = `<p class="muted" style="margin-top:14px;">Leaderboard unavailable (${r.error}).</p>`;
+    return;
+  }
+  if (!r.entries || !r.entries.length) {
+    wrap.innerHTML = `<p class="muted" style="margin-top:14px;">No one's posted today yet — be first.</p>`;
+    return;
+  }
+  const me = getUsername();
+  wrap.innerHTML = `
+    <h3 style="margin-top:18px;">Top 10 today</h3>
+    <div class="scoreboard">
+      <table>
+        <thead><tr><th>#</th><th>Player</th><th>Time</th><th>Errors</th></tr></thead>
+        <tbody>
+          ${r.entries.map((e,i) => `
+            <tr class="${e.username === me ? 'you-row' : ''}">
+              <td>${e.rank}</td>
+              <td>@${e.username}</td>
+              <td><b>${fmtTotal(e.score)}</b></td>
+              <td>${e.meta && e.meta.errors != null ? e.meta.errors : "—"}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function startDaily() {
+  pool = getDailyFlags(dailyDateStr);
+  queue = pool.slice(); // already shuffled deterministically
+  roundLength = queue.length;
+  roundIndex = 0; roundScore = 0; roundStreak = 0; roundRight = 0; roundWrong = 0;
+  missed = [];
+  dailyPerFlag = {}; dailyTotalMs = 0; dailyErrors = 0;
+  awaitingNext = false;
+  setProgress(0);
+  updateStats();
+  nextQuestion();
+}
+function renderDaily() {
+  const n = getChoiceCount();
+  const distractors = pickRandom(COUNTRIES.map(([c,nm,r,d]) => ({code:c,name:nm,region:r,difficulty:d})), n - 1, current);
+  const options = shuffle([current, ...distractors]);
+  qStart = Date.now();
+  content.innerHTML = `
+    <div class="flag-wrap">${flagImg(current.code, "Flag")}</div>
+    <div class="prompt">📅 Daily — <b>${roundIndex+1}/${queue.length}</b> · This flag: <span class="live-ticker" id="taLive">0.00s</span> · Total: <b>${fmtTotal(dailyTotalMs)}</b></div>
+    <div class="answer-area">
+      <div class="choices" id="choices">
+        ${options.map((o,i) => `<button class="choice" data-code="${o.code}" data-i="${i}"><b>${i+1}.</b> ${o.name}</button>`).join("")}
+      </div>
+      <div class="feedback" id="fb"></div>
+    </div>
+  `;
+  startLiveTicker("taLive", qStart);
+  content.querySelectorAll(".choice").forEach(btn => {
+    btn.addEventListener("click", () => handleDaily(btn));
+  });
+}
+function handleDaily(btn) {
+  if (awaitingNext) return;
+  awaitingNext = true;
+  stopLiveTicker();
+  const elapsed = Date.now() - qStart;
+  const correct = btn.dataset.code === current.code;
+  recordAnswer(correct, current);
+  if (correct) {
+    dailyPerFlag[current.code] = elapsed;
+    dailyTotalMs += elapsed;
+  } else {
+    dailyErrors++;
+    dailyTotalMs += elapsed + 5000; // 5s penalty
+  }
+  content.querySelectorAll(".choice").forEach(b => {
+    b.classList.add("disabled");
+    if (b.dataset.code === current.code) b.classList.add("correct");
+    else if (b === btn && !correct) b.classList.add("wrong");
+  });
+  $("fb").innerHTML = correct
+    ? `<span class="good">${fmtTime(elapsed)}</span>`
+    : `<span class="bad">Wrong (+5s) — ${current.name}</span>`;
+  setTimeout(() => advance(), correct ? 250 : 600);
+}
+
+async function endDailyRound() {
+  const totalMs = dailyTotalMs;
+  let submission = null;
+  if (getUsername()) {
+    submission = await apiSubmit("daily", dailyDateStr, totalMs, {
+      errors: dailyErrors,
+      flags: DAILY_COUNT
+    });
+  } else {
+    submission = { error: "no_username" };
+  }
+  renderDailyEnd(totalMs, submission);
+}
+function renderDailyEnd(totalMs, submission) {
+  const reSubmit = async () => {
+    const r = await apiSubmit("daily", dailyDateStr, totalMs, { errors: dailyErrors, flags: DAILY_COUNT });
+    renderDailyEnd(totalMs, r);
+  };
+  content.innerHTML = `
+    <div class="end-screen">
+      <h2>📅 Daily — done</h2>
+      <div class="big-score">${fmtTotal(totalMs)}</div>
+      <div class="muted">${dailyErrors} error${dailyErrors===1?"":"s"} · ${DAILY_COUNT} flags · ${dailyDateStr} (UTC)</div>
+      ${submitResultHTML(submission, false)}
+      <div class="row" style="margin-top:14px;">
+        <button class="primary" id="again">Try again (best time counts)</button>
+        <button id="viewLb">View leaderboard</button>
+      </div>
+      <div id="dailyLb"></div>
+    </div>
+  `;
+  wireInlineSetName(reSubmit);
+  $("again").onclick = () => startDaily();
+  $("viewLb").onclick = () => showLeaderboardView("daily", dailyDateStr);
+  loadDailyLeaderboardPreview();
+}
+
+/* ---------------- LEADERBOARD VIEW ---------------- */
+let lbState = { mode: "death", board: "5" };
+function showLeaderboardView(initMode, initBoard) {
+  if (initMode) lbState.mode = initMode;
+  if (initBoard != null) lbState.board = initBoard;
+  setProgress(0);
+  content.innerHTML = `
+    <div class="end-screen" style="text-align:left;">
+      <h2 style="text-align:center;">🏅 Global Leaderboards</h2>
+      <div class="lb-tabs">
+        ${[
+          ["death","Death ☠"],
+          ["timeattack","Time Attack ⏱"],
+          ["ranked","Ranked 🏆"],
+          ["daily","Daily 📅"]
+        ].map(([id,label]) => `<button class="lb-tab ${lbState.mode===id?'active':''}" data-mode="${id}">${label}</button>`).join("")}
+      </div>
+      <div class="lb-filters" id="lbFilters"></div>
+      <div id="lbBody"><p class="muted">Loading…</p></div>
+      <div class="row" style="margin-top:18px;"><button id="lbBack">Back to game</button></div>
+    </div>
+  `;
+  content.querySelectorAll(".lb-tab").forEach(t => {
+    t.onclick = () => { lbState.mode = t.dataset.mode; lbState.board = defaultBoardForMode(lbState.mode); showLeaderboardView(); };
+  });
+  $("lbBack").onclick = () => {
+    mode = "multipleChoice"; renderModes();
+    content.innerHTML = `<div class="end-screen"><h2>Pick a mode</h2><p class="muted">Choose a mode above to start a round.</p></div>`;
+  };
+  renderLbFilters();
+  refreshLbBody();
+}
+function defaultBoardForMode(m) {
+  if (m === "death") return "5";
+  if (m === "timeattack") return "all|all|4";
+  if (m === "ranked") return "global";
+  if (m === "daily") return todayUTC();
+  return "global";
+}
+function renderLbFilters() {
+  const el = document.getElementById("lbFilters");
+  if (!el) return;
+  if (lbState.mode === "death") {
+    el.innerHTML = `<label>Timer</label><select id="lbBoard">${[3,4,5,6,7,8,9,10].map(t => `<option value="${t}" ${String(t)===String(lbState.board)?'selected':''}>${t}s</option>`).join("")}</select>`;
+  } else if (lbState.mode === "timeattack") {
+    el.innerHTML = `
+      <label>Pool</label>
+      <select id="lbRegion">${["all","Africa","Americas","Asia","Europe","Oceania"].map(r => `<option value="${r}">${r}</option>`).join("")}</select>
+      <select id="lbDiff">${["all","easy","medium","hard"].map(d => `<option value="${d}">${d}</option>`).join("")}</select>
+      <select id="lbCh">${[4,5].map(n => `<option value="${n}">${n} choices</option>`).join("")}</select>
+    `;
+    const parts = String(lbState.board).split("|");
+    if (parts.length === 3) {
+      $("lbRegion").value = parts[0];
+      $("lbDiff").value = parts[1];
+      $("lbCh").value = parts[2];
+    }
+    ["lbRegion","lbDiff","lbCh"].forEach(id => {
+      $(id).onchange = () => { lbState.board = `${$("lbRegion").value}|${$("lbDiff").value}|${$("lbCh").value}`; refreshLbBody(); };
+    });
+  } else if (lbState.mode === "daily") {
+    el.innerHTML = `<label>Date (UTC)</label><input type="date" id="lbDate" value="${lbState.board || todayUTC()}" /> <button id="lbToday">Today</button>`;
+    $("lbDate").onchange = () => { lbState.board = $("lbDate").value; refreshLbBody(); };
+    $("lbToday").onclick = () => { lbState.board = todayUTC(); $("lbDate").value = lbState.board; refreshLbBody(); };
+  } else {
+    el.innerHTML = `<span class="muted">Global ranking — top rated players from placement.</span>`;
+  }
+  const bd = $("lbBoard");
+  if (bd) bd.onchange = () => { lbState.board = bd.value; refreshLbBody(); };
+}
+async function refreshLbBody() {
+  const body = document.getElementById("lbBody");
+  if (!body) return;
+  body.innerHTML = `<p class="muted">Loading…</p>`;
+  const r = await apiFetch(lbState.mode, lbState.board, 100);
+  if (!body.isConnected) return;
+  if (r.error) { body.innerHTML = `<p class="muted">Leaderboard unavailable (${r.error}). Make sure Vercel KV is connected.</p>`; return; }
+  if (!r.entries || !r.entries.length) { body.innerHTML = `<p class="muted">No entries yet — be the first to submit a score.</p>`; return; }
+  const me = getUsername();
+  const isTime = (lbState.mode === "timeattack" || lbState.mode === "daily");
+  const scoreLabel = lbState.mode === "death" ? "Survived" : lbState.mode === "ranked" ? "Rating" : "Time";
+  body.innerHTML = `
+    <div class="scoreboard">
+      <table>
+        <thead><tr><th>#</th><th>Player</th><th>${scoreLabel}</th><th>${lbState.mode==="ranked" ? "Tier" : "Details"}</th><th>Date</th></tr></thead>
+        <tbody>
+          ${r.entries.map(e => {
+            let score = isTime ? fmtTotal(e.score) : e.score;
+            let detail = "";
+            if (lbState.mode === "ranked") {
+              const t = getTier(e.score); detail = t ? `<span style="color:${t.color}">${t.name}</span>` : "—";
+            } else if (lbState.mode === "death") {
+              detail = e.meta && e.meta.region ? `${e.meta.region} · ${e.meta.difficulty || "all"}` : "—";
+            } else if (lbState.mode === "timeattack" || lbState.mode === "daily") {
+              detail = e.meta && e.meta.errors != null ? `${e.meta.errors} error${e.meta.errors===1?"":"s"}` : "—";
+            }
+            const d = e.meta && e.meta.date ? formatDate(e.meta.date) : "—";
+            return `<tr class="${e.username === me ? 'you-row' : ''}">
+              <td>${e.rank}</td>
+              <td>@${e.username}</td>
+              <td><b>${score}</b></td>
+              <td>${detail}</td>
+              <td>${d}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function startTimer(ms, onTimeout) {
+  stopTimer(); // safety: kill any stray timer before starting a new one
+  timerStart = Date.now();
+  timerDuration = ms;
+  const bar = $("tbar");
+  const text = $("ttext");
+  if (bar) bar.style.width = "100%";
+  if (text) text.textContent = (ms/1000).toFixed(1) + "s";
+  const myStart = timerStart; // capture so a later startTimer that overwrites the global cannot affect this loop
+  function tick() {
+    // Bail if a newer timer took over
+    if (timerStart !== myStart) return;
+    const elapsed = Date.now() - myStart;
+    const pct = Math.max(0, 100 - (elapsed / ms) * 100);
+    if (bar) bar.style.width = pct + "%";
+    if (text) {
+      const remaining = Math.max(0, ms - elapsed) / 1000;
+      text.textContent = remaining.toFixed(1) + "s";
+    }
+    if (elapsed >= ms) { stopTimer(); onTimeout(); return; }
+    timerHandle = requestAnimationFrame(tick);
+  }
+  tick();
+}
+function stopTimer() {
+  if (timerHandle) cancelAnimationFrame(timerHandle);
+  timerHandle = null;
+}
+
+/* Live ticker for time-attack current-question time */
+let liveTickerHandle = null;
+function startLiveTicker(elementId, startTs) {
+  stopLiveTicker();
+  function tick() {
+    const el = document.getElementById(elementId);
+    if (!el) { liveTickerHandle = requestAnimationFrame(tick); return; }
+    const t = (Date.now() - startTs) / 1000;
+    el.textContent = t.toFixed(2) + "s";
+    liveTickerHandle = requestAnimationFrame(tick);
+  }
+  tick();
+}
+function stopLiveTicker() {
+  if (liveTickerHandle) cancelAnimationFrame(liveTickerHandle);
+  liveTickerHandle = null;
+}
+
+/* ---------------- FLASHCARD ---------------- */
+let cardRevealed = false;
+function renderFlashcard() {
+  cardRevealed = false;
+  content.innerHTML = `
+    <div class="flag-wrap">${flagImg(current.code, "Flag")}</div>
+    <div class="prompt">Tap reveal, then mark how you did <span class="badge">${roundIndex+1}/${queue.length}</span></div>
+    <div class="reveal" id="reveal">
+      <button class="primary" id="revealBtn">Reveal answer</button>
+    </div>
+    <div class="row" id="cardActions" style="display:none;">
+      <button id="knewIt">I knew it ✓</button>
+      <button id="missedIt">Didn't know ✗</button>
+    </div>
+  `;
+  $("revealBtn").onclick = () => {
+    cardRevealed = true;
+    $("reveal").innerHTML = `${current.name}<small>${current.region}</small>`;
+    $("cardActions").style.display = "flex";
+  };
+  $("knewIt").onclick = () => { recordAnswer(true, current); advance(); };
+  $("missedIt").onclick = () => { recordAnswer(false, current); advance(); };
+}
+
+/* ---------------- ADVANCE ---------------- */
+function advance() {
+  awaitingNext = false;
+  roundIndex++;
+  nextQuestion();
+}
+
+/* ---------------- KEYBOARD ---------------- */
+document.addEventListener("keydown", (e) => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  const inField = tag === "input" || tag === "textarea" || tag === "select";
+
+  if (e.key === "Enter" && awaitingNext) {
+    const nxt = $("nxt");
+    if (nxt) { e.preventDefault(); nxt.click(); return; }
+  }
+  if (e.key === " " && mode === "flashcard" && !cardRevealed) {
+    const rb = $("revealBtn"); if (rb) { e.preventDefault(); rb.click(); }
+  }
+  if (!inField && /^[1-5]$/.test(e.key)) {
+    const btns = content.querySelectorAll(".choice");
+    const i = parseInt(e.key, 10) - 1;
+    if (btns[i] && !awaitingNext) btns[i].click();
+  }
+});
+
+/* ---------------- WIRE UP ---------------- */
+document.getElementById("startBtn").addEventListener("click", () => {
+  if (mode === "death") showDeathIntro();
+  else if (mode === "ranked") showRankedIntro();
+  else if (mode === "timeattack") showTimeAttackIntro();
+  else if (mode === "daily") showDailyIntro();
+  else startRound();
+});
+document.getElementById("region").addEventListener("change", () => updateStats());
+document.getElementById("difficulty").addEventListener("change", () => updateStats());
+document.getElementById("resetStats").addEventListener("click", () => {
+  if (!confirm("Reset all scores, history, best score, and death scoreboard?")) return;
+  state = freshState();
+  lastDeathRunDate = null;
+  saveState();
+  updateStats();
+});
+
+document.getElementById("userBtn").addEventListener("click", () => openUserModal());
+document.getElementById("leaderboardBtn").addEventListener("click", () => showLeaderboardView());
+refreshUserLabel();
+
+renderModes();
+pool = buildPool();
+updateStats();
+content.innerHTML = `
+  <div class="end-screen">
+    <h2>Ready to learn every flag?</h2>
+    <p class="muted">Pick a mode above. Choose a region or difficulty if you want to focus. Then hit <b>Start round</b>.</p>
+    <div class="row" style="margin-top:14px;">
+      <button class="primary" onclick="document.getElementById('startBtn').click()">Start round</button>
+    </div>
+    <p class="muted" style="margin-top:18px; font-size:13px;">${COUNTRIES.length} countries · 5 regions · 6 modes</p>
+  </div>
+`;
+</script>
+</body>
+</html>
