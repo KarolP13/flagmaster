@@ -39,15 +39,17 @@ gh repo create flagmaster --public --source=. --push
 2. Import the GitHub repo you just pushed
 3. Click **Deploy** (no build step needed)
 
-### 3. Add Vercel KV
+### 3. Add Upstash Redis
 
-1. In your Vercel project dashboard, click **Storage** → **Create Database** → **KV**
-2. Pick a region near your users
-3. Click **Connect** — Vercel will add the `KV_REST_API_URL` and `KV_REST_API_TOKEN`
-   environment variables automatically
-4. **Redeploy** the project so the API picks up the new env vars
+1. In your Vercel project dashboard, click **Storage** → **Marketplace** → **Upstash**
+2. Create a **Redis** database (not Vector/Queue/Search)
+3. Pick a region near your users
+4. When prompted, connect to the `flagmaster` project — Vercel will inject
+   `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` env vars (and a `KV_*` set
+   for backwards compatibility)
+5. **Redeploy** the project so the API picks up the env vars
 
-Done. Visit your `*.vercel.app` URL — leaderboards work globally.
+The API auto-detects either env var scheme. Done — leaderboards work globally.
 
 ## Local development
 
@@ -66,5 +68,5 @@ API calls will fail silently and the rest of the game still works.
 
 - Vanilla HTML/CSS/JS (no build step)
 - Vercel serverless function for `/api/leaderboard`
-- Vercel KV (Upstash Redis) sorted sets for the boards
+- Upstash Redis sorted sets for the boards (connected via Vercel Marketplace)
 - Flag images from [flagcdn.com](https://flagcdn.com)

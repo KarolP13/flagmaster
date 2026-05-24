@@ -2,8 +2,8 @@
   "name": "flagmaster",
   "version": "1.0.0",
   "private": true,
-  "description": "Learn every flag in the world. Static site + Vercel KV leaderboards.",
+  "description": "Learn every flag in the world. Static site + Upstash Redis leaderboards.",
   "dependencies": {
-    "@vercel/kv": "^3.0.0"
+    "@upstash/redis": "^1.34.3"
   }
 }
